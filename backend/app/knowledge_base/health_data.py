@@ -1,3 +1,7 @@
+# This is the knowledge base for the Arohan AI health assistant.
+# Add more documents here as the project grows.
+# Each string is one "document" that gets embedded and stored in ChromaDB.
+
 HEALTH_KNOWLEDGE_BASE = [
 
     # --- Blood Pressure ---

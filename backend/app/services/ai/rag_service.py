@@ -7,18 +7,26 @@ import logging
 logger = logging.getLogger(__name__)
 
 class RAGService:
+    """
+    RAG (Retrieval Augmented Generation) service for Arohan health assistant.
+    Embeds the health knowledge base and retrieves relevant context for queries.
+    """
+
     def __init__(self):
         self.db = None
+        self.embedding_model = None
         self._initialize()
 
     def _initialize(self):
+        """Load embedding model and build ChromaDB from health knowledge base."""
         try:
-            logger.info("Initializing RAG service...")
+            logger.info("Initializing RAG service — loading embedding model...")
 
-            embedding_model = HuggingFaceEmbeddings(
+            self.embedding_model = HuggingFaceEmbeddings(
                 model_name="sentence-transformers/all-MiniLM-L6-v2"
             )
 
+            # Convert plain strings to LangChain Document objects
             documents = [
                 Document(
                     page_content=text,
@@ -27,34 +35,38 @@ class RAGService:
                 for text in HEALTH_KNOWLEDGE_BASE
             ]
 
+            # Build ChromaDB vector store in memory
             self.db = Chroma.from_documents(
                 documents,
-                embedding_model,
+                self.embedding_model,
                 collection_name="arohan_health_knowledge"
             )
 
-            logger.info(f"RAG ready — {len(documents)} documents embedded.")
+            logger.info(f"RAG service ready — {len(documents)} documents embedded.")
 
         except Exception as e:
-            logger.error(f"RAG init failed: {e}")
+            logger.error(f"Failed to initialize RAG service: {e}")
             raise
 
     def retrieve_context(self, query: str, k: int = 3) -> str:
-        """Called by llm_service.py"""
+        """
+        Retrieve top-k relevant chunks for a given query.
+        Returns them as a single joined context string for the LLM.
+        """
         if not self.db:
+            logger.warning("RAG DB not initialized, returning empty context.")
             return ""
+
         try:
             results = self.db.similarity_search(query, k=k)
-            return "\n\n".join([doc.page_content for doc in results])
+            context = "\n\n".join([doc.page_content for doc in results])
+            logger.info(f"Retrieved {len(results)} chunks for query: '{query[:50]}'")
+            return context
+
         except Exception as e:
             logger.error(f"Retrieval failed: {e}")
             return ""
 
 
-# Singleton instance
+# Singleton instance — initialized once when server starts
 rag_service = RAGService()
-
-
-# Called by agent_service.py
-def get_rag_context(query: str) -> str:
-    return rag_service.retrieve_context(query)
