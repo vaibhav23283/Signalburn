@@ -1,10 +1,10 @@
 import { Audio } from 'expo-av';
 import { useState, useRef, useEffect } from 'react';
 import { Platform } from 'react-native';
+import { API_BASE_URL } from '@/constants/api';
 
-// Configuration for Backend
-// Use the computer's actual local IP address for physical Android testing
-const BACKEND_URL = 'http://192.168.68.131:8000/api/v1/ai/process';
+// Backend voice endpoint — uses the shared API_BASE_URL from constants/api.ts
+const BACKEND_URL = `${API_BASE_URL}/api/v1/ai/process`;
 
 export type VoiceState = 'idle' | 'recording' | 'processing' | 'playing' | 'error';
 
