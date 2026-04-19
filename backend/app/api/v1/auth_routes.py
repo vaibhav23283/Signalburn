@@ -2,7 +2,7 @@ import uuid
 from fastapi import APIRouter, HTTPException
 from twilio.base.exceptions import TwilioRestException
 from app.models.auth_models import RequestOTPPayload, VerifyOTPPayload
-from app.services.auth.auth_service import generate_otp, verify_otp
+from app.services.auth.auth_service import generate_otp, verify_otp, DatabaseUnavailableError, RateLimitExceededError
 
 router = APIRouter()
 
@@ -15,11 +15,13 @@ def request_otp(payload: RequestOTPPayload):
     try:
         generate_otp(payload.phone_number)
         return {"message": "OTP sent successfully via SMS"}
+    except RateLimitExceededError as e:
+        raise HTTPException(status_code=429, detail=str(e))
+    except DatabaseUnavailableError as e:
+        raise HTTPException(status_code=503, detail=str(e))
     except ValueError as e:
-        # Twilio credentials not configured
         raise HTTPException(status_code=500, detail=str(e))
     except TwilioRestException as e:
-        # Twilio API-level error (invalid number, trial limits, etc.)
         raise HTTPException(status_code=502, detail=f"SMS delivery failed: {e.msg}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error sending OTP: {str(e)}")
@@ -30,11 +32,14 @@ def verify_otp_endpoint(payload: VerifyOTPPayload):
     if not payload.phone_number or not payload.user_otp:
         raise HTTPException(status_code=400, detail="Phone number and OTP are required")
 
-    is_valid = verify_otp(payload.phone_number, payload.user_otp)
+    try:
+        is_valid = verify_otp(payload.phone_number, payload.user_otp)
+    except DatabaseUnavailableError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
 
     if is_valid:
-        # Generate a unique session token for this user
-        # TODO: Replace with a signed JWT token in production
         session_token = str(uuid.uuid4())
         return {
             "message": "Authentication successful",
@@ -42,4 +47,4 @@ def verify_otp_endpoint(payload: VerifyOTPPayload):
             "phone_number": payload.phone_number,
         }
     else:
-        raise HTTPException(status_code=401, detail="Invalid or expired OTP. Please try again.")
+        raise HTTPException(status_code=401, detail="Incorrect OTP. Please try again.")

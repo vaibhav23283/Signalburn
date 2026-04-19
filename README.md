@@ -52,38 +52,55 @@ Arohan/
 *   [Python 3.9+](https://www.python.org/)
 *   [Expo Go](https://expo.dev/client) app on your physical device or an Android/iOS emulator.
 
-### Installation & Running Locally
+### Installation
 
 1.  **Clone the repository:**
     ```bash
     git clone <repository-url>
     cd Arohan
-    ```
-
-2.  **Start the Backend Engine (FastAPI):**
-    ```bash
-    cd backend
-    python -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-    pip install -r requirements.txt
-    
-    # Ensure you set up the environment variables (Twilio & Gemini API Keys)
-    # create a .env file and add your credentials.
-    
-    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-    ```
-
-3.  **Start the Frontend (Expo):**
-    Open a new terminal window:
-    ```bash
-    cd Arohan
     npm install
-    npx expo start
     ```
 
-4.  **Run on device/emulator:**
-    *   **Physical Device**: Scan the QR code with the Expo Go app. *Note: Ensure your device and local development server are on the same WiFi network for backend connectivity.*
-    *   **Emulator**: Press `a` for Android or `i` for iOS in the terminal.
+2.  **Environment Setup (Networking):**
+    *   Create a `.env` file in the root `Arohan` directory.
+    *   Add your local IP (or Ngrok URL) to connect the app to the backend:
+        ```env
+        EXPO_PUBLIC_API_URL=http://<YOUR_LOCAL_IP>:8000
+        ```
+
+### Running the App Locally
+
+You will need to open **4 separate terminal windows** to launch the full environment:
+
+**1. Start the Database (Redis)**
+The authentication flow requires Redis. If using Docker Desktop:
+```bash
+docker run -d -p 6379:6379 --name local-redis redis
+```
+
+**2. Start the Backend API**
+Use the provided batch script to automatically activate the environment and bind the server globally.
+```bash
+cd backend
+start_backend.bat
+```
+
+**3. Start the Ngrok Tunnel**
+Because mobile devices require a secure remote tunnel to the backend, run Ngrok on port 8000:
+```bash
+ngrok http 8000
+```
+> **Important:** Copy the `https://...ngrok-free.app` URL it generates. Open the `.env` file located in the root of the project, and paste it so it looks like this:
+> `EXPO_PUBLIC_API_URL=https://1234-abcd.ngrok-free.app`
+
+**4. Start the Frontend (Expo)**
+Once your `.env` is updated, launch the mobile app:
+```bash
+cd Arohan
+npx expo start
+```
+
+*   **Testing Tip:** You can bypass the Twilio SMS setup entirely during development by entering the phone number `9999999999`. The system will automatically log you in with the OTP `123456`.
 
 ## 🤝 Contributing
 
