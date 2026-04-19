@@ -45,8 +45,16 @@ export const AuthService = {
             if (response.ok) {
                 return { success: true };
             } else {
-                const data = await response.json();
-                return { success: false, error: data.detail ?? 'Failed to send OTP' };
+                const text = await response.text();
+                let errorMsg = 'Failed to send OTP';
+                try {
+                    const data = JSON.parse(text);
+                    errorMsg = data.detail ?? errorMsg;
+                } catch {
+                    // Fallback if ngrok or proxy returns non-JSON (like "Too Many Requests")
+                    errorMsg = text || errorMsg;
+                }
+                return { success: false, error: errorMsg };
             }
         } catch (e) {
             console.error('AuthService.sendOTP error:', e);
@@ -76,8 +84,15 @@ export const AuthService = {
                 await saveToken(data.token, phoneNumber);
                 return { success: true };
             } else {
-                const data = await response.json();
-                return { success: false, error: data.detail ?? 'Incorrect OTP. Please try again.' };
+                const text = await response.text();
+                let errorMsg = 'Incorrect OTP. Please try again.';
+                try {
+                    const data = JSON.parse(text);
+                    errorMsg = data.detail ?? errorMsg;
+                } catch {
+                    errorMsg = text || errorMsg;
+                }
+                return { success: false, error: errorMsg };
             }
         } catch (e) {
             console.error('AuthService.verifyOTP error:', e);

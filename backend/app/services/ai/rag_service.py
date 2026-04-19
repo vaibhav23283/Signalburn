@@ -1,6 +1,6 @@
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
-from langchain.schema import Document
+from langchain_core.documents import Document
 from app.knowledge_base.health_data import HEALTH_KNOWLEDGE_BASE
 import logging
 
@@ -26,7 +26,6 @@ class RAGService:
                 model_name="sentence-transformers/all-MiniLM-L6-v2"
             )
 
-            # Convert plain strings to LangChain Document objects
             documents = [
                 Document(
                     page_content=text,
@@ -35,7 +34,6 @@ class RAGService:
                 for text in HEALTH_KNOWLEDGE_BASE
             ]
 
-            # Build ChromaDB vector store in memory
             self.db = Chroma.from_documents(
                 documents,
                 self.embedding_model,
@@ -46,7 +44,9 @@ class RAGService:
 
         except Exception as e:
             logger.error(f"Failed to initialize RAG service: {e}")
-            raise
+            # Gracefully degrade so the rest of the app (auth, etc.) still works
+            self.embedding_model = None
+            self.db = None
 
     def retrieve_context(self, query: str, k: int = 3) -> str:
         """
