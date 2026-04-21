@@ -27,6 +27,8 @@ Arohan is a mobile application designed to provide immediate assistance to elder
 ### Backend (API Services)
 *   **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Python)
 *   **AI Engine**: [Google Gemini 1.5 Flash](https://deepmind.google/technologies/gemini/flash/) (Speech-to-Text & Generative AI)
+*           Voice Service - Google Gemini 1.5 Flash
+*           LLM Service - Google Gemini 2.0 Pro 
 *   **Authentication Service**: [Twilio SMS OTP](https://www.twilio.com/en-us/trusted-activation/verify)
 
 ## 📂 Project Structure
