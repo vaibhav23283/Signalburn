@@ -54,5 +54,13 @@
     "react-test-renderer": "19.1.0",
     "typescript": "~6.0.3"
   },
-  "private": true
+  "private": true,
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": ["expo-av"],
+        "listUnknownPackages": false
+      }
+    }
+  }
 }
