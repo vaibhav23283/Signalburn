@@ -165,7 +165,7 @@ export default function ProfileSetup() {
                             backgroundColor: COLORS.card,
                         }}
                         value={otherCondition}
-                        onChangeText={setOtherCondition}
+                        onChangeText={(text) => setOtherCondition(text.replace(/\d/g, ''))}
                     />
 
                     <View style={{ flex: 1 }} />

@@ -3,7 +3,7 @@ import sys
 
 # Add backend directory to sys.path so app imports work
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__))))
-
+# Now we can import from app.services.auth
 from app.services.auth.auth_service import generate_otp, verify_otp, redis_client
 
 def run_tests():

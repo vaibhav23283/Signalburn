@@ -36,7 +36,7 @@ describe('Validation Logic', () => {
         expect(getByText('enter age in numbers')).toBeTruthy();
     });
 
-    it('prevents contact save if phone is too short', async () => {
+    it('prevents contact save if phone is not exactly 10 digits', async () => {
         const { getByText, getByPlaceholderText } = render(<EmergencyContacts />);
         const addBtn = getByText('+ Add Contact');
         fireEvent.press(addBtn);
