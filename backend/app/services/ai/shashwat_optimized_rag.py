@@ -17,6 +17,7 @@ from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
 
 from app.core.config import settings
+print("========== SHASHWAT_OPTIMIZED_RAG FILE LOADED ==========")
 
 logger = logging.getLogger(__name__)
 
@@ -70,35 +71,54 @@ class ShashwatOptimizedRAG:
         return str(configured)
 
     def _initialize(self) -> None:
+        print("========== SHASHWAT RAG INITIALIZE STARTED ==========")
+
         self.chroma_dir = self._resolve_chroma_dir()
+
+        print(f"DEBUG CHROMA PATH = {self.chroma_dir}")
+        print(f"DEBUG EXISTS = {os.path.exists(self.chroma_dir)}")
+
         if not self.chroma_dir or not os.path.exists(self.chroma_dir):
+            print(f"DEBUG DB NOT FOUND = {self.chroma_dir}")
             logger.warning("Shashwat optimized Chroma DB not found at %s", self.chroma_dir)
             return
 
         try:
-            logger.warning(f"ACTUAL_CHROMA_PATH={self.chroma_dir}")
-            logger.warning(f"PATH_EXISTS={os.path.exists(self.chroma_dir)}")
-            logger.info("Loading Shashwat optimized RAG DB from %s", self.chroma_dir)
+            print("DEBUG LOADING EMBEDDINGS")
+
             self.embedding_model = HuggingFaceEmbeddings(
-                model_name="sentence-transformers/all-MiniLM-L6-v2",
-                model_kwargs={"device": "cpu"},
-                encode_kwargs={"normalize_embeddings": True},
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            model_kwargs={"device": "cpu"},
+            encode_kwargs={"normalize_embeddings": True},
             )
+
+            print("DEBUG EMBEDDINGS LOADED")
+
             Chroma = _load_chroma_class()
+
+            print("DEBUG OPENING CHROMA DB")
+
             self.db = Chroma(
-                persist_directory=self.chroma_dir,
-                embedding_function=self.embedding_model,
+            persist_directory=self.chroma_dir,
+            embedding_function=self.embedding_model,
             )
+
+            print("DEBUG CHROMA OPENED SUCCESSFULLY")
+
             self.retriever = self.db.as_retriever(
-                search_type="mmr",
-                search_kwargs={"k": 4, "fetch_k": 10},
+            search_type="mmr",
+            search_kwargs={"k": 4, "fetch_k": 10},
             )
+
+            print("DEBUG RETRIEVER CREATED")
+
             logger.info("Shashwat optimized RAG ready with MMR retrieval.")
+
         except Exception as exc:
+            print(f"DEBUG CHROMA ERROR = {exc}")
             logger.error("Failed to load Shashwat optimized RAG: %s", exc)
             self.db = None
             self.retriever = None
-
     @staticmethod
     def deconstruct_query(query: str) -> List[str]:
         clean = (query or "").strip()
