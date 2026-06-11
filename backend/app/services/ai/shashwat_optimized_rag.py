@@ -76,6 +76,8 @@ class ShashwatOptimizedRAG:
             return
 
         try:
+            logger.warning(f"ACTUAL_CHROMA_PATH={self.chroma_dir}")
+            logger.warning(f"PATH_EXISTS={os.path.exists(self.chroma_dir)}")
             logger.info("Loading Shashwat optimized RAG DB from %s", self.chroma_dir)
             self.embedding_model = HuggingFaceEmbeddings(
                 model_name="sentence-transformers/all-MiniLM-L6-v2",
