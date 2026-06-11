@@ -98,9 +98,18 @@ class ShashwatOptimizedRAG:
 
             print("DEBUG OPENING CHROMA DB")
 
+            db_file = Path(self.chroma_dir) / "chroma.sqlite3"
+
+            with open(db_file, "rb") as f:
+                first_bytes = f.read(100)
+
+            print(f"FIRST_100_BYTES = {first_bytes}")
+
+            Chroma = _load_chroma_class()
+
             self.db = Chroma(
-            persist_directory=self.chroma_dir,
-            embedding_function=self.embedding_model,
+                persist_directory=self.chroma_dir,
+                embedding_function=self.embedding_model,
             )
 
             print("DEBUG CHROMA OPENED SUCCESSFULLY")
